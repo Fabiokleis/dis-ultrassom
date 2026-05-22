@@ -1,8 +1,21 @@
 #include <iostream>
 #include <armadillo>
 #include "cgne.h"
+#include "parser.h"
+
+#define CSV_SIGNAL_FILE "G-1.csv"
+#define CSV_MODEL_FILE "H-1.csv"
 
 int main() {
+  CsvParser p;
+  read_signal(CSV_SIGNAL_FILE, &p);
+  read_model(CSV_MODEL_FILE, &p);
+
+  std::cout << p.g << std::endl;
+  return 0;
+}
+
+int main2() {
     int N = 10; // tamamho da imagem
     int S = 20; // numero de amostras do sinal g
 
