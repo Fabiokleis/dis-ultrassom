@@ -1,7 +1,9 @@
 #include <iostream>
+#include <cmath>
 #include <armadillo>
 #include "cgne.h"
 #include "parser.h"
+#include "generate_image.h"
 
 #define CSV_SIGNAL_FILE "G-1.csv"
 #define CSV_MODEL_FILE "H-1.csv"
@@ -11,12 +13,23 @@ int main() {
   read_signal(CSV_SIGNAL_FILE, &p);
   read_model(CSV_MODEL_FILE, &p);
 
-  std::cout << p.g << std::endl;
+  std::cout << p.g.n_rows << std::endl;
+  std::cout << p.H.n_rows << "x" << p.H.n_cols << std::endl;
+
+  arma::vec f_calculado = cgne(p.H, p.g, 1e-4, 10);
+
+  f_calculado.save("saida.csv", arma::csv_ascii);
+
+  int side = (int)std::sqrt((double)f_calculado.n_elem);
+  save_png(f_calculado, side, side, "saida.png");
+
+  std::cout << "Imagem salva: saida.png (" << side << "x" << side << ")" << std::endl;
+
   return 0;
 }
 
 int main2() {
-    int N = 10; // tamamho da imagem
+    int N = 30; // tamamho da imagem
     int S = 20; // numero de amostras do sinal g
 
     arma::mat H = arma::randu<arma::mat>(S, N);

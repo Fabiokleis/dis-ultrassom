@@ -29,4 +29,7 @@ file(GLOB TEST_SOURCES "tests/*.cpp")
 add_executable(run_tests ${TEST_SOURCES})
 target_link_libraries(run_tests core_lib doctest::doctest)
 
+configure_file(G-1.csv G-1.csv COPYONLY)
+configure_file(H-1.csv H-1.csv COPYONLY)
+
 add_test(NAME cgne_convergence_test COMMAND run_tests)
