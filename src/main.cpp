@@ -17,12 +17,14 @@ int main() {
   std::cout << p.H.n_rows << "x" << p.H.n_cols << std::endl;
 
   arma::vec f_calculado = cgne(p.H, p.g, 1e-4, 10);
+  arma::vec saida = arma::abs(f_calculado);
+  
+  saida.save("saida.csv", arma::csv_ascii);
 
-  f_calculado.save("saida.csv", arma::csv_ascii);
-
-  int side = (int)std::sqrt((double)f_calculado.n_elem);
-  save_png(f_calculado, side, side, "saida.png");
-
+  int side = (int)std::sqrt((double)saida.n_elem);
+  save_png(saida, side, side, "saida.png");
+  
+  
   std::cout << "Imagem salva: saida.png (" << side << "x" << side << ")" << std::endl;
 
   return 0;
