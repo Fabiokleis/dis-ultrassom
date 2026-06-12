@@ -2,6 +2,9 @@
 
 Trabalho da disciplina ICSM31 - Desenvolvimento Integrado de Sistemas
 
+## Planejamento
+![planejamento](./Planejamento.png)
+
 ## Setup
 utilize o nix para instalar as dependencias do projeto: https://nixos.org/download/
 ou instale as dependencias c++ manualmente:
