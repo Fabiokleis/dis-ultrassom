@@ -6,6 +6,12 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.137.1",
+    "numpy>=2.0.0",
+    "python-multipart>=0.0.9",
+    "pillow>=11.0.0",
+    "requests>=2.34.2",
+    "gradio>=6.18.0",
+    "httpx>=0.28.1",
 ]
 
 [dependency-groups]
@@ -34,6 +40,7 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 addopts = "-v --tb=short"
 testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.fastapi]
 entrypoint = "server.app:app"

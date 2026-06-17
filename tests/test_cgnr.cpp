@@ -8,7 +8,8 @@ TEST_CASE("CGNR deve minimizar o erro nas equacoes normais") {
     arma::vec f_real = arma::randu<arma::vec>(N) * 10.0; 
     arma::vec g_simulado = H * f_real;
 
-    arma::vec f_calculado = cgnr(H, g_simulado, 1e-4, 11);
+    AlgResult r = cgnr(H, g_simulado, 1e-4, 11);
+    arma::vec f_calculado = r.f;
 
     double erro_reconstrucao = arma::norm(f_real - f_calculado, 2);
 

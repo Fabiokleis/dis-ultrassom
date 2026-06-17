@@ -22,27 +22,29 @@ for i = 0, 1,..., until convergence
   pi+1 = HT * ri+1 + βi * pi
 
 */
-arma::vec cgne(const arma::mat& H, const arma::vec& g, double tol, size_t max_iter) { 
+AlgResult cgne(const arma::mat& H, const arma::vec& g, double tol, size_t max_iter) { 
     size_t n = H.n_cols;
-    arma::vec f = arma::zeros<arma::vec>(n); // vetor unitario 0
-    arma::vec r = g - H * f; // residuo (g sinal - martriz modelo * imagem f )
-    arma::vec p = H.t() * r; // p direcao
+    arma::vec f = arma::zeros<arma::vec>(n);
+    arma::vec r = g - H * f;
+    arma::vec p = H.t() * r;
     
-    double r_norm_sq = arma::dot(r, r); // produto interno
+    double r_norm_sq = arma::dot(r, r);
     double norma_r_atual = arma::norm(r, 2);
+    size_t iterations_done = 0;
    
     for (size_t i = 0; i < max_iter; ++i) {
+        iterations_done = i + 1;
         
-        double p_norm_sq = arma::dot(p, p); // produto interno
-        double alpha = r_norm_sq / p_norm_sq; // divisao do produto interno dos dois vetores unitarios
+        double p_norm_sq = arma::dot(p, p);
+        double alpha = r_norm_sq / p_norm_sq;
        
-        f = f + alpha * p; // atualiza imagem reconstruida f 
+        f = f + alpha * p;
         
-        arma::vec r_next = r - alpha * (H * p); // recalcula residuo ao passo alpha
+        arma::vec r_next = r - alpha * (H * p);
 
 	double norma_r_novo = arma::norm(r_next, 2);
 
-	double epsilon = norma_r_novo - norma_r_atual; // diferenca de residuo (grau de estagnacao)
+	double epsilon = norma_r_novo - norma_r_atual;
 	if (std::abs(epsilon) < tol) {
 	    std::cout << "Parada por estagnacao na iteracao: " << i << std::endl;
 	    break;
@@ -58,6 +60,6 @@ arma::vec cgne(const arma::mat& H, const arma::vec& g, double tol, size_t max_it
 	norma_r_atual = norma_r_novo;
     }
     
-    return f;
+    return {f, iterations_done};
 }
 

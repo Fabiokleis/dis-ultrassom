@@ -27,7 +27,7 @@ for i=0,1,...,until convergence
   pi+1 = zi+1 + βi * pi
 
 */
-arma::vec cgnr(const arma::mat& H, const arma::vec& g, double tol, size_t max_iter) {
+AlgResult cgnr(const arma::mat& H, const arma::vec& g, double tol, size_t max_iter) {
     size_t n = H.n_cols;
     arma::vec f = arma::zeros<arma::vec>(n);
     arma::vec r = g - H * f;
@@ -35,8 +35,10 @@ arma::vec cgnr(const arma::mat& H, const arma::vec& g, double tol, size_t max_it
     arma::vec p = z;
 
     double norma_r_atual = arma::norm(r, 2);
+    size_t iterations_done = 0;
 
     for (size_t i = 0; i < max_iter; ++i) {
+        iterations_done = i + 1;
 	arma::vec w = H * p;
        
         double z_norm_sq = arma::dot(z, z);
@@ -68,6 +70,5 @@ arma::vec cgnr(const arma::mat& H, const arma::vec& g, double tol, size_t max_it
         norma_r_atual = norma_r_novo;
     }
     
-
-    return f;
+    return {f, iterations_done};
 }

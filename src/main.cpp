@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <armadillo>
+#include "result.h"
 #include "cgne.h"
 #include "parser.h"
 #include "generate_image.h"
@@ -16,7 +17,8 @@ int main() {
   std::cout << p.g.n_rows << std::endl;
   std::cout << p.H.n_rows << "x" << p.H.n_cols << std::endl;
 
-  arma::vec f_calculado = cgne(p.H, p.g, 1e-4, 10);
+  AlgResult r = cgne(p.H, p.g, 1e-4, 10);
+  arma::vec f_calculado = r.f;
   arma::vec saida = arma::abs(f_calculado);
   
   saida.save("saida.csv", arma::csv_ascii);
@@ -41,7 +43,8 @@ int main2() {
     arma::vec g_simulado = H * f_real;
 
     std::cout << "CGNE..." << std::endl;
-    arma::vec f_calculado = cgne(H, g_simulado, 1e-4, 10);
+    AlgResult r = cgne(H, g_simulado, 1e-4, 10);
+    arma::vec f_calculado = r.f;
 
     std::cout << "  f_real  |  f_calculado" << std::endl;
     std::cout << "--------------------------" << std::endl;
