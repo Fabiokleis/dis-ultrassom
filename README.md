@@ -13,6 +13,13 @@ ou instale as dependencias c++ manualmente:
 e **pkg-config**: > instale via o gerenciador de pacotes da sua distro
 * **doctest**: https://github.com/doctest/doctest/blob/master/doc/markdown/build-systems.md
 
+o projeto foi construido com as seguintes ferramentas do ecossistema python:
+
+* **[NixOS (shell.nix)](https://nixos.org/)**
+* **[uv](https://github.com/astral-sh/uv)**
+* **[Ruff](https://docs.astral.sh/ruff/)**
+* **[Pytest](https://docs.pytest.org/)**
+
 no terminal, na raiz do repositório, execute:
 ```bash
 nix-shell

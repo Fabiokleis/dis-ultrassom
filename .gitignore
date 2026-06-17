@@ -1,3 +1,18 @@
 build
 
+.venv/
+venv/
+env/
+
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
 *.csv
