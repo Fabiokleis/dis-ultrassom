@@ -13,6 +13,7 @@ from server.models import (
 from server.cgne import cgne
 from server.cgnr import cgnr
 from server.image_generator import save_png
+from server.signal_gain import apply_signal_gain
 
 app = FastAPI(
     title="Ultrassom Image Reconstruction API",
@@ -50,6 +51,7 @@ def opa():
 def reconstruct_image(
     signal_id: SignalModel = Query(..., description="ID do sinal para determinar qual matriz H usar"),
     algorithm: Algorithm = Query(..., alias="alg", description="Algoritmo de reconstrução"),
+    gain: bool = Query(False, description="Aplicar ganho de sinal (gamma)"),
     signal: list[float] = Body(..., description="Vetor de sinais G (CSV no body)")
 ):
     """
@@ -58,6 +60,7 @@ def reconstruct_image(
     Args:
         signal_id: ID do sinal (G-1 a G-6) para determinar qual modelo H usar
         algorithm: Algoritmo (cgne ou cgnr)
+        gain: Se True, aplica ganho γ_l = 100 + (1/20) * l * sqrt(l) ao sinal
         signal: Vetor de sinais G enviado no body como array JSON
     
     Returns:
@@ -69,6 +72,10 @@ def reconstruct_image(
     try:
         # Converter signal para numpy array
         g = np.array(signal)
+        
+        # Aplicar ganho se solicitado
+        if gain:
+            g = apply_signal_gain(g)
         
         # Carregar matriz modelo H correspondente ao signal_id
         H = load_model_matrix(signal_id)
