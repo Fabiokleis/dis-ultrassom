@@ -6,6 +6,9 @@ install:
 run:
 	uv run fastapi dev
 
+run-cpp-server: build
+	./build/app_cpp
+
 test-py:
 	uv run pytest
 
