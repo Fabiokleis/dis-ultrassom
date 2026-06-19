@@ -12,6 +12,9 @@ from server.models import (
     JobResult
 )
 from server.queue import ReconstructionDispatcher 
+import numpy as np
+
+np.show_config()
 
 dispatcher = ReconstructionDispatcher()
 

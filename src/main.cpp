@@ -3,6 +3,7 @@
 #include <armadillo>
 #include "result.h"
 #include "cgne.h"
+#include "cgnr.h"
 #include "parser.h"
 #include "generate_image.h"
 
@@ -17,14 +18,12 @@ int main() {
   std::cout << p.g.n_rows << std::endl;
   std::cout << p.H.n_rows << "x" << p.H.n_cols << std::endl;
 
-  AlgResult r = cgne(p.H, p.g, 1e-4, 10);
+  AlgResult r = cgnr(p.H, p.g, 1e-4, 10);
   arma::vec f_calculado = r.f;
   arma::vec saida = arma::abs(f_calculado);
-  
-  saida.save("saida.csv", arma::csv_ascii);
 
   int side = (int)std::sqrt((double)saida.n_elem);
-  save_png(saida, side, side, "saida.png");
+  save_png(saida, side, side, "saida-cgnr.png");
   
   
   std::cout << "Imagem salva: saida.png (" << side << "x" << side << ")" << std::endl;
