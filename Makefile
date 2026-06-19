@@ -23,4 +23,7 @@ lint:
 format:
 	uv run ruff format
 
+clear:
+	rm imagens/*.png
+
 check: format lint test

@@ -58,7 +58,7 @@ class ReconstructionRequest(BaseModel):
 
 class ReconstructionMetadata(BaseModel):
     """Metadados de uma reconstrução"""
-    job_id: str
+    job_id: int
     signal_id: str
     model_matrix: str
     algorithm: str
@@ -69,18 +69,17 @@ class ReconstructionMetadata(BaseModel):
     image_width: int
     image_height: int
     image_path: str
-
-
+    
 class JobResponse(BaseModel):
     """Resposta ao submeter um job"""
-    job_id: str
+    job_id: int
     status: JobStatus
     message: str
     
     class Config:
         json_schema_extra = {
             "example": {
-                "job_id": "123e4567-e89b-12d3-a456-426614174000",
+                "job_id": 1,
                 "status": "pending",
                 "message": "Job criado e aguardando processamento"
             }
@@ -89,7 +88,7 @@ class JobResponse(BaseModel):
 
 class JobResult(BaseModel):
     """Resultado de um job de reconstrução"""
-    job_id: str
+    job_id: int
     status: JobStatus
     metadata: ReconstructionMetadata | None = None
     error: str | None = None
