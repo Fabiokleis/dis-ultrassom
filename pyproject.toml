@@ -23,6 +23,9 @@ dev = [
 [tool.uv]
 package = true
 
+[tool.setuptools]
+packages = ["client", "server"]
+
 [tool.ruff]
 line-length = 80
 target-version = "py312"
