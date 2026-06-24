@@ -5,8 +5,9 @@ from pathlib import Path
 from datetime import datetime
 
 from server.models import (
-    Algorithm,
+    AlgorithmModel,
     SignalModel,
+    ScaleModel,
     JobResponse,
     JobStatus,
     JobResult
@@ -41,15 +42,16 @@ def opa():
 
 @app.post("/ultrassom", response_model=JobResponse)
 async def submit_reconstruction(
-    signal_id: SignalModel = Query(..., description="ID do sinal para determinar qual matriz H usar"),
-    algorithm: Algorithm = Query(..., alias="alg", description="Algoritmo de reconstrução"),
+    signal_id: SignalModel = Query(..., description="ID do sinal"),
+    scale: ScaleModel = Query(..., description="Escala 30 ou 60"),
+    algorithm: AlgorithmModel = Query(..., description="Algoritmo de reconstrução"),
     gain: bool = Query(False, description="Aplicar ganho de sinal (gamma)"),
     signal: UploadFile = File(..., description="Arquivo CSV com vetor de sinais G")
 ):
     """Submete o sinal para processamento na fila e retorna o ID do Job."""
     signal_data = await signal.read()
     
-    job_id = dispatcher.submit_job(signal_id, algorithm, gain, signal_data)
+    job_id = dispatcher.submit_job(signal_id, algorithm, scale, gain, signal_data)
     
     return JobResponse(
         job_id=job_id,

@@ -1,37 +1,52 @@
 """Modelos de dados e tipos para a API"""
-from enum import Enum
+from enum import Enum, Flag
 from typing import Literal
 from pydantic import BaseModel, Field
 from datetime import datetime
+import random
 
-
-class Algorithm(str, Enum):
+class AlgorithmModel(int, Enum):
     """Algoritmos de reconstrução disponíveis"""
-    CGNE = "cgne"
-    CGNR = "cgnr"
+    CGNE = 1
+    CGNR = 2
 
+    @classmethod
+    def random_choice(cls):
+        return random.choice(list(cls))
 
-class SignalModel(str, Enum):
+class ScaleModel(int, Enum):
     """
-    Enumeração de sinais disponíveis e suas matrizes modelo correspondentes.
-    
-    Nomenclatura: G{n} → H{m}
-    - G-1, G-2, G-3 → H-1
-    - G-4, G-5, G-6 → H-2
+    Enumeraação das Escalas suportadas 30 e 60
+
+    Nomenclatura: S{n} → H{m}
+    - S-1 → H-1
+    - S-2 → H-2
     """
-    G1 = "G-1"
-    G2 = "G-2"
-    G3 = "G-3"
-    G4 = "G-4"
-    G5 = "G-5"
-    G6 = "G-6"
+    S1 = 30
+    S2 = 60
+
+    @classmethod
+    def random_choice(cls):
+        return random.choice(list(cls))
     
     def get_model_matrix(self) -> str:
         """Retorna o nome da matriz modelo correspondente"""
-        if self in (SignalModel.G1, SignalModel.G2, SignalModel.G3):
+        if self == ScaleModel.S1:
             return "H-1"
         else:
             return "H-2"
+    
+class SignalModel(int, Enum):
+    """
+    Enumeração de sinais disponíveis.
+    """
+    G1 = 1
+    G2 = 2
+    G3 = 3
+    
+    @classmethod
+    def random_choice(cls):
+        return random.choice(list(cls))
 
 
 class JobStatus(str, Enum):
@@ -44,13 +59,13 @@ class JobStatus(str, Enum):
 
 class ReconstructionRequest(BaseModel):
     """Requisição de reconstrução de imagem"""
-    signal_id: SignalModel = Field(..., description="ID do sinal (G-1 a G-6)")
-    algorithm: Algorithm = Field(..., description="Algoritmo de reconstrução (cgne ou cgnr)")
+    signal_id: SignalModel = Field(..., description="ID do sinal (1-2-3)")
+    algorithm: AlgorithmModel = Field(..., description="Algoritmo de reconstrução (cgne ou cgnr)")
     
     class Config:
         json_schema_extra = {
             "example": {
-                "signal_id": "G-1",
+                "signal_id": 1,
                 "algorithm": "cgne"
             }
         }
@@ -59,9 +74,10 @@ class ReconstructionRequest(BaseModel):
 class ReconstructionMetadata(BaseModel):
     """Metadados de uma reconstrução"""
     job_id: int
-    signal_id: str
+    signal_id: int
+    scale: int
     model_matrix: str
-    algorithm: str
+    algorithm: int
     iterations: int
     start_time: datetime
     end_time: datetime | None = None

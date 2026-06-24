@@ -8,7 +8,7 @@ from threading import Thread
 
 from server.models import (
     JobResult, JobStatus, ReconstructionMetadata, 
-    Algorithm, SignalModel
+    AlgorithmModel, SignalModel, ScaleModel
 )
 from server.cgne import cgne
 from server.cgnr import cgnr
@@ -19,9 +19,9 @@ DATA_DIR = Path(".")
 IMAGES_DIR = Path("imagens")
 IMAGES_DIR.mkdir(exist_ok=True)
 
-def load_model_matrix(signal_id: SignalModel) -> np.ndarray:
+def load_model_matrix(scale: ScaleModel) -> np.ndarray:
     """Carrega a matriz modelo H correspondente ao signal_id"""
-    matrix_name = signal_id.get_model_matrix()
+    matrix_name = scale.get_model_matrix()
     matrix_path = DATA_DIR / f"{matrix_name}.csv"
     if not matrix_path.exists():
         raise FileNotFoundError(f"Arquivo de matriz modelo não encontrado: {matrix_name}.csv")
@@ -71,7 +71,7 @@ class ReconstructionWorker:
                 break
 
             print(f"[Worker {self.worker_id} ]")
-            job_id, signal_id, algorithm, gain, file_content = job_data
+            job_id, signal_id, scale, algorithm, gain, file_content = job_data
             
             try:
                 self.job_db.update_job(job_id, JobStatus.PROCESSING)
@@ -84,12 +84,12 @@ class ReconstructionWorker:
                 if gain:
                     g = apply_signal_gain(g)
                     
-                H = load_model_matrix(signal_id)
+                H = load_model_matrix(scale)
                 
                 if H.shape[0] != g.shape[0]:
                     raise ValueError(f"Dimensões incompatíveis: H tem {H.shape[0]} linhas mas g tem {g.shape[0]} elementos")
                     
-                if algorithm == Algorithm.CGNE:
+                if algorithm == AlgorithmModel.CGNE:
                     f, iterations = cgne(H, g, tol=1e-4, max_iter=10)
                 else:
                     f, iterations = cgnr(H, g, tol=1e-4, max_iter=10)
@@ -107,9 +107,10 @@ class ReconstructionWorker:
 
                 metadata = ReconstructionMetadata(
                     job_id=job_id,
-                    signal_id=signal_id.value,
-                    model_matrix=signal_id.get_model_matrix(),
-                    algorithm=algorithm.value,
+                    signal_id=signal_id,
+                    scale=scale,
+                    model_matrix=scale.get_model_matrix(),
+                    algorithm=algorithm,
                     iterations=iterations,
                     start_time=start_time,
                     end_time=end_time,
@@ -141,9 +142,9 @@ class ReconstructionDispatcher:
         for i in range(num_workers):
             self.workers.append(ReconstructionWorker(i, self.jobs_queue, self.job_db))
             
-    def submit_job(self, signal_id: SignalModel, algorithm: Algorithm, gain: bool, file_content: bytes) -> int:
+    def submit_job(self, signal_id: SignalModel, algorithm: AlgorithmModel, scale: ScaleModel, gain: bool, file_content: bytes) -> int:
         job_id = self.job_db.create_job()
-        self.jobs_queue.put((job_id, signal_id, algorithm, gain, file_content))
+        self.jobs_queue.put((job_id, signal_id, scale, algorithm, gain, file_content))
         return job_id
     
     def stop_all(self):

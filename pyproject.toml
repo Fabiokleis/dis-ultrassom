@@ -20,22 +20,15 @@ dev = [
     "ruff>=0.15.17",
 ]
 
+[tool.uv]
+package = true
+
 [tool.ruff]
 line-length = 80
 target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
-
-
-[tool.mypy]
-plugins = [
-    "pydantic.mypy"
-]
-strict = true
-warn_return_any = true
-warn_unused_configs = true
-
 
 [tool.pytest.ini_options]
 addopts = "-v --tb=short"
@@ -44,3 +37,6 @@ pythonpath = ["."]
 
 [tool.fastapi]
 entrypoint = "server.app:app"
+
+[project.scripts]
+client = "client.simulation:main"

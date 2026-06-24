@@ -1,14 +1,9 @@
 [
     {
-        "algorithm": "cgnr",
+        "algorithm": 2,
         "scale": 60,
-        "signal_id": 3,
-        "wait_time": 5
-    },
-    {
-        "algorithm": "cgnr",
-        "scale": 60,
-        "signal_id": 1,
-        "wait_time": 5
+        "signal_id": 2,
+        "wait_time": 5,
+        "gain": true
     }
 ]

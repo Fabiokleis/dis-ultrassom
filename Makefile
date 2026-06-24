@@ -6,6 +6,9 @@ install:
 run:
 	uv run fastapi dev
 
+run-client:
+	uv run client
+
 run-cpp-server: build
 	./build/app_cpp
 
