@@ -3,8 +3,10 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from server.models import (
     AlgorithmModel,
@@ -35,7 +37,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 IMAGES_DIR = Path("imagens")
+REPORT_CSV = Path("reconstruction_report.csv")
 
 @app.get("/opa")
 def opa():
@@ -104,3 +110,55 @@ def download_image(filename: str):
         media_type="image/png",
         filename=filename
     )
+
+@app.get("/report", response_class=HTMLResponse)
+def get_report_page():
+    """Serve a página HTML do relatório."""
+    html_path = Path("static/index.html")
+    
+    if not html_path.exists():
+        raise HTTPException(status_code=404, detail="Página de relatório não encontrada")
+    
+    return FileResponse(html_path)
+
+@app.get("/report/data")
+def get_report_data():
+    """Retorna dados das reconstruções do arquivo reconstruction_report.csv."""
+    try:
+        if not REPORT_CSV.exists():
+            return {"reconstructions": []}
+        
+        # Lê o CSV de relatório
+        df = pd.read_csv(REPORT_CSV)
+        
+        # Filtra apenas completados
+        df_completed = df[df['status'] == 'completed'].copy()
+        
+        if len(df_completed) == 0:
+            return {"reconstructions": []}
+        
+        # Prepara dados
+        df_completed['duration_s'] = df_completed['duration_ms'] / 1000
+        df_completed['image_filename'] = df_completed['image_path'].apply(
+            lambda x: Path(x).name if pd.notna(x) else None
+        )
+        
+        # Dados das reconstruções
+        reconstructions = []
+        for _, row in df_completed.iterrows():
+            reconstructions.append({
+                "job_id": int(row['job_id']),
+                "signal_id": int(row['signal_id']),
+                "scale": int(row['scale']),
+                "algorithm": int(row['algorithm']),
+                "gain": bool(row['gain']),
+                "iterations": int(row['iterations']),
+                "duration_s": float(row['duration_s']),
+                "num_workers": int(row['num_workers']),
+                "image_filename": row['image_filename']
+            })
+        
+        return {"reconstructions": reconstructions}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao ler relatório: {str(e)}")
