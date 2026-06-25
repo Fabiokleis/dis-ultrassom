@@ -58,3 +58,50 @@ ou limpar tudo:
 ```bash
 rm -rf * # garanta q esta em build antes de fazer isso
 ```
+
+## Benchmark de Workers
+
+O sistema gera relatórios CSV com métricas de performance (CPU, RAM, duração) para encontrar o número ótimo de workers.
+
+### Executar Benchmark Individual
+
+Execute em um terminal:
+```bash
+make benchmark WORKERS=4
+```
+
+Em outro terminal, execute o cliente:
+```bash
+make run-client
+```
+
+Repita para diferentes configurações:
+```bash
+make benchmark WORKERS=2
+make benchmark WORKERS=4
+make benchmark WORKERS=6
+make benchmark WORKERS=8
+make benchmark WORKERS=10
+make benchmark WORKERS=12
+```
+
+Cada execução gera: `benchmark_results/report_Xw.csv`
+
+### Analisar Resultados
+
+Após coletar vários CSVs:
+```bash
+make analyze-benchmark
+```
+
+Gera gráfico com 3 comparações: `benchmark_analysis.png`
+- Throughput e Tempo de processamento
+- Uso de CPU e RAM
+- Score de eficiência
+
+### Aplicar Configuração
+
+```bash
+export NUM_WORKERS=6
+make run
+```

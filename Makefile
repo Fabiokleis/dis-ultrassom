@@ -33,3 +33,10 @@ clear:
 	rm imagens/*.png
 
 check: format lint test
+
+benchmark:
+	@mkdir -p benchmark_results
+	@NUM_WORKERS=$(WORKERS) REPORT_FILE=benchmark_results/report_$(WORKERS)w.csv make run
+
+analyze-benchmark:
+	uv run python3 analyze_benchmark.py benchmark_results/

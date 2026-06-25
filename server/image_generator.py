@@ -1,9 +1,10 @@
 """
 Geração de imagem PNG a partir de vetor reconstruído
 """
+from pathlib import Path
+
 import numpy as np
 from PIL import Image
-from pathlib import Path
 
 
 def save_png(f: np.ndarray, width: int, height: int, path: str) -> None:
