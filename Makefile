@@ -1,16 +1,17 @@
-.PHONY: install run test test-py test-cpp build lint format check
+.PHONY: install run test test-py test-cpp build lint format check clear
+.PHONY: run-cpp analyze-benchmark-py analyze-benchmark-cpp
 
 install:
 	uv sync
 
 run:
-	uv run fastapi dev
+	NUM_WORKERS=$(or $(WORKERS),4) uv run uvicorn server.app:app --host 0.0.0.0 --port 8000
 
 run-client:
 	uv run client
 
-run-cpp-server: build
-	./build/dis
+run-cpp: build
+	./build/dis 8000 $(or $(WORKERS),4)
 
 test-py:
 	uv run pytest
@@ -34,9 +35,8 @@ clear:
 
 check: format lint test
 
-benchmark:
-	@mkdir -p benchmark_results
-	@NUM_WORKERS=$(WORKERS) REPORT_FILE=benchmark_results/report_$(WORKERS)w.csv make run
+analyze-benchmark-py:
+	uv run python analyze_benchmark.py workers_results/python python
 
-analyze-benchmark:
-	uv run python3 analyze_benchmark.py benchmark_results/
+analyze-benchmark-cpp:
+	uv run python analyze_benchmark.py workers_results/cpp cpp

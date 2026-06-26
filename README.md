@@ -2,106 +2,217 @@
 
 Trabalho da disciplina ICSM31 - Desenvolvimento Integrado de Sistemas
 
+Sistema de reconstrução de imagens de ultrassom usando algoritmos iterativos (CGNE e CGNR) com implementações em Python e C++.
+
 ## Planejamento
 ![planejamento](./Planejamento.png)
 
 ## Setup
-utilize o nix para instalar as dependencias do projeto: https://nixos.org/download/
-ou instale as dependencias c++ manualmente:
+
+### Dependências C++
+
+Utilize o nix para instalar as dependencias do projeto: https://nixos.org/download/
+
+Ou instale manualmente:
 * **Armadillo**: https://arma.sourceforge.net/
 * **CMake**: https://cmake.org/download/
-e **pkg-config**: > instale via o gerenciador de pacotes da sua distro
+* **pkg-config**: Instale via gerenciador de pacotes da sua distro
 * **doctest**: https://github.com/doctest/doctest/blob/master/doc/markdown/build-systems.md
+* **httplib**: Incluído via git submodule (cpp-httplib)
+* **lodepng**: Incluído no projeto
 
-o projeto foi construido com as seguintes ferramentas do ecossistema python:
+### Dependências Python
 
+O projeto usa:
 * **[NixOS (shell.nix)](https://nixos.org/)**
 * **[uv](https://github.com/astral-sh/uv)**
 * **[Ruff](https://docs.astral.sh/ruff/)**
 * **[Pytest](https://docs.pytest.org/)**
 
-no terminal, na raiz do repositório, execute:
+No terminal, na raiz do repositório:
 ```bash
 nix-shell
 ```
 
-uma vez dentro do shell do nix todas as bibliotecas e clis necessarias para compilacao 
-estarao disponiveis.
+Instalar dependências Python:
+```bash
+make install
+```
 
 ## Build
-o projeto usa cmake para fazer a compilacao, fazer o link, e para compilar execute:
+
+Compilar projeto C++:
 ```bash
-mkdir -p build
-cmake ..
-make
+make build
 ```
 
 ## Tests
-foi configurado o doctest para testes unitarios, para executar no terminal:
 
+Executar todos os testes (C++ e Python):
 ```bash
-./run_tests
-```
-
-## Run
-ao fim da compilacao deve ser gerado um binario `dis`, execute no terminal:
-```bash
-./dis
+make test
 ```
 
-## Clean
-dentro do diretorio `build` pode ser removido os arquivos de build:
+Ou separadamente:
 ```bash
-make clean
+make test-cpp    # Testes C++ com doctest
+make test-py     # Testes Python com pytest
 ```
-ou limpar tudo:
+
+## Executando os Servidores
+
+### Servidor Python (FastAPI + Multiprocessing)
+
+Iniciar servidor com 4 workers (padrão):
 ```bash
-rm -rf * # garanta q esta em build antes de fazer isso
+make run
 ```
+
+Ou especificar número de workers:
+```bash
+make run WORKERS=8
+```
+
+O servidor inicia na porta **8000**.
+
+### Servidor C++ (httplib + Threads)
+
+Iniciar servidor com 4 workers (padrão):
+```bash
+make run-cpp
+```
+
+Ou especificar número de workers:
+```bash
+make run-cpp WORKERS=8
+```
+
+O servidor inicia na porta **8000**.
+
+## Cliente de Simulação
+
+O cliente envia requisições de reconstrução para o servidor:
+
+```bash
+uv run client 8000
+```
+
+Gera relatório CSV com métricas de cada job processado.
 
 ## Benchmark de Workers
 
-O sistema gera relatórios CSV com métricas de performance (CPU, RAM, duração) para encontrar o número ótimo de workers.
+### Python
 
-### Executar Benchmark Individual
+Para cada configuração de workers (1, 2, 4, 6, 8, 10, 12):
 
-Execute em um terminal:
+**Terminal 1** - Iniciar servidor:
 ```bash
-make benchmark WORKERS=4
+make run WORKERS=1
 ```
 
-Em outro terminal, execute o cliente:
+**Terminal 2** - Executar simulação:
 ```bash
-make run-client
+uv run client 8000
 ```
 
-Repita para diferentes configurações:
+**Terminal 1** - Parar servidor (Ctrl+C) e mover CSV:
 ```bash
-make benchmark WORKERS=2
-make benchmark WORKERS=4
-make benchmark WORKERS=6
-make benchmark WORKERS=8
-make benchmark WORKERS=10
-make benchmark WORKERS=12
+mv reconstruction_report.csv workers_results/python/report_1w.csv
 ```
 
-Cada execução gera: `benchmark_results/report_Xw.csv`
+Repetir para todos os valores de workers.
 
-### Analisar Resultados
+### C++
 
-Após coletar vários CSVs:
+Para cada configuração de workers:
+
+**Terminal 1** - Iniciar servidor:
 ```bash
-make analyze-benchmark
+make run-cpp WORKERS=1
 ```
 
-Gera gráfico com 3 comparações: `benchmark_analysis.png`
-- Throughput e Tempo de processamento
-- Uso de CPU e RAM
-- Score de eficiência
+**Terminal 2** - Executar simulação:
+```bash
+uv run client 8000
+```
 
-### Aplicar Configuração
+**Terminal 1** - Parar servidor (Ctrl+C) e mover CSV:
+```bash
+mv reconstruction_report_cpp.csv workers_results/cpp/report_1w.csv
+```
+
+Repetir para todos os valores de workers.
+
+### Análise de Benchmark
+
+Após coletar todos os CSVs:
 
 ```bash
-export NUM_WORKERS=6
-make run
+make analyze-benchmark-py     # Gera workers_results/python/benchmark_analysis_python.png
+make analyze-benchmark-cpp    # Gera workers_results/cpp/benchmark_analysis_cpp.png
+```
+
+Os gráficos mostram 3 métricas:
+- Tempo médio de execução (ms)
+- Uso médio de CPU (%)
+- Uso médio de RAM (MB)
+
+## Comparação Python vs C++
+
+Execute 100 jobs em cada servidor e compare:
+
+**Python:**
+```bash
+make run WORKERS=4
+uv run client 8000
+# Gera: reconstruction_report.csv
+```
+
+**C++:**
+```bash
+make run-cpp WORKERS=4
+uv run client 8000
+# Gera: reconstruction_report_cpp.csv
+```
+
+**Análise comparativa:**
+```bash
+uv run python analyze_comparison.py
+# Gera: comparison_analysis.png
+```
+
+O gráfico mostra comparação temporal de 3 métricas ao longo dos jobs:
+- Tempo de execução
+- Uso de CPU
+- Uso de RAM
+
+## Estrutura de Resultados
+
+```
+workers_results/
+├── python/
+│   ├── report_1w.csv, report_2w.csv, ..., report_12w.csv
+│   └── benchmark_analysis_python.png
+└── cpp/
+    ├── report_1w.csv, report_2w.csv, ..., report_12w.csv
+    └── benchmark_analysis_cpp.png
+
+reconstruction_report.csv       # Python (último run)
+reconstruction_report_cpp.csv   # C++ (último run)
+comparison_analysis.png         # Comparação Python vs C++
+```
+
+## Lint e Format
+
+```bash
+make format    # Formatar código Python com ruff
+make lint      # Verificar código Python com ruff
+make check     # format + lint + test
+```
+
+## Clean
+
+Remover imagens geradas:
+```bash
+make clear
 ```

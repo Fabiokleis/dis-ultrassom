@@ -32,7 +32,7 @@ def calculate_metrics(df):
 
 def plot_temporal_comparison(py_df, cpp_df):
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-    fig.suptitle("Comparacao Temporal: Python vs C++", fontsize=14)
+    fig.suptitle("Python vs C++", fontsize=14)
     
     py_df['job_index'] = range(len(py_df))
     cpp_df['job_index'] = range(len(cpp_df))
