@@ -3,8 +3,6 @@
 
 #include <string>
 #include <json.hpp>
-#include <mutex>
-#include <fstream>
 
 enum class Algorithm {
     CGNE = 1,
@@ -33,62 +31,25 @@ class ReconstructionMetadata {
 public:
     int job_id;
     int signal_id;
-    int scale_id;
-    int model_matrix;
+    int scale;
+    std::string model_matrix;
     int algorithm;
     bool gain;
     int iterations;
-    std::string starttime;
-    std::string endtime;
+    std::string start_time;
+    std::string end_time;
     float duration_ms;
     float cpu_percent;
     float ram_mb;
     int num_workers;
     std::string status;
     std::string error;
-    int image_width;
-    int image_height;
     std::string image_path;
-    std::ofstream report;
-    std::mutex report_mutex;
 
     ReconstructionMetadata()
-    {
-        report.open("reconstruction_report_cpp.csv", std::ios::app);
-        report << "job_id,signal_id,scale,model_matrix,algorithm,gain,iterations,duration_ms,start_time,end_time,cpu_percent,ram_mb,num_workers,status,error,image_path\n";
-    }
-    ~ReconstructionMetadata()
-    {
-        if(report.is_open())
-        {
-            report.close();
-        }
-    }
-
-    void WriteRow()
-    {
-        std::lock_guard<std::mutex> lock(report_mutex);
-        report << job_id << "," 
-               << signal_id << ","
-               << scale_id << ","
-               << model_matrix << ","
-               << algorithm << ","
-               << gain << ","
-               << iterations << ","
-               << starttime << ","
-               << endtime << ","
-               << duration_ms << ","
-               << cpu_percent << ","
-               << ram_mb << ","
-               << num_workers << ","
-               << status << ","
-               << error << ","
-               << image_width << ","
-               << image_height << ","
-               << image_path << "\n";
-        std::lock_guard<std::mutex> unlock(report_mutex);
-    }
-
+        : job_id(0), signal_id(0), scale(0), algorithm(0), 
+          gain(false), iterations(0), duration_ms(0.0f),
+          cpu_percent(0.0f), ram_mb(0.0f), num_workers(0) {}
 };
 
 class JobResult {

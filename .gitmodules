@@ -1,0 +1,3 @@
+[submodule "deps/cppuprofile"]
+	path = deps/cppuprofile
+	url = git@github.com:Orange-OpenSource/cppuprofile.git

@@ -10,7 +10,7 @@ run-client:
 	uv run client
 
 run-cpp-server: build
-	./build/app_cpp
+	./build/dis
 
 test-py:
 	uv run pytest
@@ -21,7 +21,7 @@ test-cpp: build
 test: test-cpp test-py
 
 build:
-	mkdir -p build/ && cmake -S . -B ./build && cd ./build && make
+	mkdir -p build/ && cmake -S . -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cd ./build && make
 
 lint:
 	uv run ruff check --fix

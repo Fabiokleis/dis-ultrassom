@@ -1,13 +1,7 @@
 #ifndef METRICS_H
 #define METRICS_H
 
-#include <string>
-#include <json.hpp>
-#include <mutex>
-#include <fstream>
-
-class SystemMetrics {
-public:
+struct SystemMetrics {
     float cpu_percent;
     float ram_mb;
     int num_workers;
@@ -15,7 +9,7 @@ public:
 
 class MetricsCollector {
 public:
-    static SystemMetrics CollectMetrics();
+    static SystemMetrics CollectMetrics(int num_workers);
 };
 
-#endif
+#endif // METRICS_H

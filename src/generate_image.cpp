@@ -4,9 +4,10 @@
 #include <vector>
 
 void save_png(const arma::vec& f, int width, int height, const char* path) {
-  double mn = f.min();
-  double mx = f.max();
-  arma::vec norm = (mx != mn) ? arma::vec((f - mn) / (mx - mn) * 255.0) : arma::zeros<arma::vec>(f.n_elem);
+  arma::vec f_abs = arma::abs(f);
+  double mn = f_abs.min();
+  double mx = f_abs.max();
+  arma::vec norm = (mx != mn) ? arma::vec((f_abs - mn) / (mx - mn) * 255.0) : arma::zeros<arma::vec>(f.n_elem);
   
   std::vector<unsigned char> pixels(f.n_elem);
   for (size_t i = 0; i < f.n_elem; i++)
