@@ -76,9 +76,11 @@ std::string get_current_timestamp_str() {
 
 int main(int argc, char* argv[]) {
 
+
     int threads = std::thread::hardware_concurrency();
 
-    if(argc > 1) {
+
+    if(argc > 1){
         threads = std::stoi(argv[1]);
     }
 
@@ -86,14 +88,6 @@ int main(int argc, char* argv[]) {
     httplib::Server svr;
 
 
-    svr.new_task_queue = [threads] {
-
-        return new httplib::ThreadPool(threads);
-
-    };
-
-
-    // Garante que a pasta de imagens existe
     fs::create_directories(IMAGES_DIR);
 
     // [GET] / -> Health Check
@@ -174,7 +168,7 @@ int main(int argc, char* argv[]) {
             }
 
             // 6. Executar o algoritmo escolhido
-            AlgResult r;
+    AlgResult r;
             if (algorithm == "cgne") {
                 r = cgne(H, g, 1e-4, 10);
             } else if (algorithm == "cgnr") {
