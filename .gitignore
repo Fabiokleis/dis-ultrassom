@@ -14,6 +14,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-
+compile_commands.json
 *.csv
 
