@@ -9,6 +9,7 @@
 #include <sstream>
 #include <algorithm>
 #include <armadillo>
+#include <thread>
 
 #include <httplib.h>
 #include <json.hpp>
@@ -73,9 +74,25 @@ std::string get_current_timestamp_str() {
     return ss.str();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+
+    int threads = std::thread::hardware_concurrency();
+
+    if(argc > 1) {
+        threads = std::stoi(argv[1]);
+    }
+
+
     httplib::Server svr;
-    
+
+
+    svr.new_task_queue = [threads] {
+
+        return new httplib::ThreadPool(threads);
+
+    };
+
+
     // Garante que a pasta de imagens existe
     fs::create_directories(IMAGES_DIR);
 
@@ -275,6 +292,18 @@ int main() {
     });
 
     std::cout << "Servidor Ultrassom C++ escutando na porta 8000...\n";
-    svr.listen("0.0.0.0", 8000);
+    
+    std::cout 
+    << "Servidor C++ usando "
+    << threads
+    << " threads\n";
+
+
+    svr.listen(
+        "0.0.0.0",
+        8000
+    );
+
+
     return 0;
 }
