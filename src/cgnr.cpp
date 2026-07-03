@@ -34,12 +34,11 @@ AlgResult cgnr(const arma::mat& H, const arma::vec& g, double tol, size_t max_it
     arma::vec z = H.t() * r;
     arma::vec p = z;
 
-    double norma_r_atual = arma::norm(r, 2);
     size_t iterations_done = 0;
 
     for (size_t i = 0; i < max_iter; ++i) {
         iterations_done = i + 1;
-	arma::vec w = H * p;
+        arma::vec w = H * p;
        
         double z_norm_sq = arma::dot(z, z);
         double w_norm_sq = arma::dot(w, w);
@@ -51,10 +50,9 @@ AlgResult cgnr(const arma::mat& H, const arma::vec& g, double tol, size_t max_it
         arma::vec r_next = r - alpha * w;
         
         double norma_r_novo = arma::norm(r_next, 2);
-        double epsilon = norma_r_novo - norma_r_atual;
         
-        if (std::abs(epsilon) < tol) {
-            std::cout << ">>> CGNR: Convergencia (estagnacao) na iteracao: " << i << std::endl;
+        if (norma_r_novo < tol) {
+            std::cout << ">>> CGNR: Convergencia atingida na iteracao: " << i << std::endl;
             break;
         }
         
@@ -67,7 +65,7 @@ AlgResult cgnr(const arma::mat& H, const arma::vec& g, double tol, size_t max_it
 
         r = r_next;
         z = z_next;
-        norma_r_atual = norma_r_novo;
+        // Linha antiga da norma_r_atual FOI REMOVIDA DAQUI
     }
     
     return {f, iterations_done};

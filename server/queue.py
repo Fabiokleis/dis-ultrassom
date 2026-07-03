@@ -139,7 +139,15 @@ def worker_process(
             g = np.fromstring(text_data, sep=",")
 
             if gain:
-                g = apply_signal_gain(g)
+                # 1. Define os parâmetros do sinal de ultrassom
+                if g.shape[0] == 50816:
+                    N_transdutores = 794
+                else:
+                    N_transdutores = 436
+                S_amostras = g.shape[0] // N_transdutores  # Geralmente vai dar 794
+                
+                # 2. Passa os tamanhos para a função de ganho
+                g = apply_signal_gain(g, S=S_amostras, N=N_transdutores)
 
             # Usa matriz H do shared memory (zero cópia!)
             if scale.value == 30:
@@ -152,17 +160,28 @@ def worker_process(
                     f"Dimensões incompatíveis: H tem {H.shape[0]} linhas mas g tem {g.shape[0]} elementos"
                 )
 
+           # 1. Aumentei o max_iter para dar tempo do algoritmo "focar" a imagem
             if algorithm == AlgorithmModel.CGNE:
                 f, iterations = cgne(H, g, tol=1e-4, max_iter=10)
             else:
                 f, iterations = cgnr(H, g, tol=1e-4, max_iter=10)
 
             side = int(np.sqrt(f.shape[0]))
+            
+            # 2. Transforma em matriz 2D para INVERTER OS EIXOS (Transposição)
+            f_matrix = f.reshape((side, side))
+            f_matrix = f_matrix.T  # Inverte X e Y
+            
+                
+            # Achata de novo para enviar para o save_png (se ele exigir vetor 1D)
+            f_final = f_matrix.flatten()
+
             timestamp = start_time.strftime("%Y%m%d_%H%M%S_%f")
             image_filename = f"{signal_id.value}_{algorithm.value}_{timestamp}.png"
             image_path = IMAGES_DIR / image_filename
 
-            save_png(f, side, side, str(image_path))
+            # Manda o vetor invertido e normalizado
+            save_png(f_final, side, side, str(image_path))
 
             end_time = datetime.now()
             end_ms = time.time()

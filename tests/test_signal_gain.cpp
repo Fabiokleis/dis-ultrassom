@@ -3,7 +3,7 @@
 
 TEST_CASE("apply_signal_gain deve aplicar ganho corretamente") {
     arma::vec g = {1.0, 2.0, 3.0, 4.0, 5.0};
-    arma::vec g_with_gain = apply_signal_gain(g);
+    arma::vec g_with_gain = apply_signal_gain(g, 5, 1); // S=5, N=1
     
     CHECK(g_with_gain.n_elem == g.n_elem);
     
@@ -34,7 +34,7 @@ TEST_CASE("compute_gain_vector deve calcular ganhos corretamente") {
 
 TEST_CASE("apply_signal_gain deve preservar zeros") {
     arma::vec g = {0.0, 1.0, 0.0, 2.0, 0.0};
-    arma::vec g_with_gain = apply_signal_gain(g);
+    arma::vec g_with_gain = apply_signal_gain(g, 5, 1); // S=5, N=1
     
     // Zeros devem permanecer zeros
     CHECK(g_with_gain(0) == 0.0);

@@ -92,21 +92,45 @@ void WorkerPool::process_job(const JobInput& job) {
     try {
         const arma::mat& H = select_matrix(job.scale);
         arma::vec g(job.signal_data);
-        
+
         if (job.gain) {
-            g = apply_signal_gain(g);
+            int N = 64; // O transdutor de ultrassom tem sempre 64 canais
+            int S_amostras = 0;
+            
+            // Define o número de amostras (S) por canal dependendo do tamanho total do sinal
+            if (g.n_elem == 50816) {
+                S_amostras = 794;
+            } else if (g.n_elem == 27904) {
+                S_amostras = 436;
+            } else {
+                // Caso seja um sinal genérico de testes
+                N = 1;
+                S_amostras = g.n_elem;
+            }
+            // 2. Passa os tamanhos para a função de ganho
+            g = apply_signal_gain(g, S_amostras, N);
         }
-        
+
+
         AlgResult result;
         if (job.algorithm == static_cast<int>(Algorithm::CGNE)) {
+            // CORRIGIDO: Passando job.iterations dinamicamente
             result = cgne(H, g, 1e-4, job.iterations);
         } else {
+            // CORRIGIDO: Passando job.iterations dinamicamente
             result = cgnr(H, g, 1e-4, job.iterations);
         }
+        
         
         arma::vec f = result.f;
         
         int side = static_cast<int>(std::sqrt(f.n_elem));
+
+        
+
+        // 3. Achata de novo para o formato que o save_png espera (.flatten())
+        
+    
         
         // Gera timestamp para o nome do arquivo (formato: YYYYMMDD_HHMMSS_microseconds)
         auto now = std::chrono::system_clock::now();

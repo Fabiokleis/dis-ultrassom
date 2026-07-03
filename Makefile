@@ -32,6 +32,7 @@ format:
 
 clear:
 	rm imagens/*.png
+	rm -f reconstruction_report.csv
 
 check: format lint test
 
